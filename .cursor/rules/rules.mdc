@@ -1,0 +1,63 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Global Project Rules – Forex Ring Alerts
+
+> **Purpose:**
+> These rules govern every aspect of the Forex Ring Alerts project. They are designed to ensure world-class quality, maintainability, and operational excellence. Every contributor and the Windsurf coding agent must follow these rules with diligence and discipline. These rules are your compass—refer to them before and after every action, and keep the project documentation (`implementation.md` and `context.md`) in perfect sync at all times.
+> 
+> **You must also constantly read and reference `docs/global_rules.md` itself, alongside `implementation.md` and `context.md`, before and after every action. This file is a living guide and must be actively followed and updated as the project evolves.**
+
+---
+
+## 1. Documentation as the Source of Truth
+- `docs/implementation.md` and `docs/context.md` are the canonical sources for project status, intent, decisions, and next steps.
+- The project memory (used by the Windsurf agent) must also be kept up to date at all times, reflecting key context, decisions, and changes. This ensures the agent and team always have accurate project awareness.
+- **Before and after every action** (code change, bug fix, design decision, deployment, etc.), review and update both files as needed.
+- These files are to be kept up to date at all times—never let them fall out of sync with reality.
+- Cross-reference is not optional: both files work together and must be maintained in tandem.
+
+## 2. Diligence and Professionalism
+- Approach every task as a world-class Node.js/TypeScript engineer with 20+ years' experience.
+- Think through every move, anticipate consequences, and never rush.
+- If unsure, proactively research documentation, best practices, and industry standards.
+- All code must be modular, maintainable, scalable, efficient, and robust from the outset—no shortcuts.
+
+## 3. Project Principles
+- **Purposeful Code:** Every piece and line of code in this project must have a clear, necessary purpose. No code should exist without explicit justification—remove or refactor anything that does not serve the system's goals.
+- **Separation of Concerns:** Isolate business logic, integrations, and utilities into well-defined modules.
+- **Clear Interfaces:** Use explicit, type-safe interfaces for all modules and APIs.
+- **Dependency Injection:** Favor DI for testability and flexibility.
+- **No Duplication:** Avoid code, logic, and documentation duplication at all times.
+- **Composability:** Favor composition over inheritance; keep modules and functions small and focused.
+- **Extensibility:** Design for future features and integrations—never paint yourself into a corner.
+- **Testing:** Every module must have comprehensive tests; strive for high coverage and meaningful assertions.
+- **Error Handling:** All errors are normalized, logged, and actionable.
+- **Security:** Follow best practices for secrets, authentication, and user data protection.
+- **Performance:** Optimize hot paths and resource usage; measure and tune regularly.
+- **Scalability:** Architect for horizontal scaling and operational resilience.
+- **Documentation:** Keep all code and system documentation clear, concise, and up to date.
+
+## 4. Workflow Discipline
+- Every change—big or small—must be reflected in both `implementation.md` (tasks, structure, checklists) and `context.md` (rationale, progress, blockers, decisions).
+- Never merge or deploy code unless both files accurately reflect the current state.
+- Use `context.md` to log blockers, bugs, decisions, and next steps immediately as they arise or are resolved.
+- Use `implementation.md` to track progress, update checklists, and refine structure as the project evolves.
+- Treat documentation as code: review, update, and refactor it with the same rigor.
+- **Never leave dead code or redundant code in the codebase.** After every action, thoroughly review all written and modified code to ensure it is clean, relevant, and adheres to all global rules. Remove any unused, commented-out, or obsolete code immediately.
+
+## 5. Communication and Collaboration
+- All contributors (human or agent) must keep each other informed via `context.md` and `implementation.md`.
+- When in doubt, over-communicate: explain your reasoning, cite sources, and document alternatives considered.
+- Use clear, professional language in all documentation and commit messages.
+
+## 6. Continuous Improvement
+- Regularly review these rules and update them as the project matures.
+- Retrospect on what works, what doesn’t, and adapt the workflow and documentation accordingly.
+
+---
+
+> **Remember:**
+> `implementation.md` and `context.md` are your compass. Keep them updated, detailed, and accurate—before and after every action. This is how we build a world-class, maintainable, and scalable system together.
