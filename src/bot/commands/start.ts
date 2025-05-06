@@ -2,9 +2,10 @@
 // Handler for the /start command
 
 import { sendTelegramMessage } from '../../integrations/telegram';
-import { getUserByTelegramId } from '../../integrations/supabase';
+import { getUserByTelegramId, createUser } from '../../integrations/supabase';
 import { TelegramChat, TelegramUser } from '../../integrations/telegram';
 import { mainMenuKeyboard } from '../menu';
+import { FlowManager } from '../flows/flowManager';
 
 /**
  * Handle the /start command
@@ -18,50 +19,45 @@ export async function handleStartCommand(chat: TelegramChat, user: TelegramUser,
   const username = user.username || user.first_name || 'there';
   if (!telegramId) return;
 
-  const dbUser = await getUserByTelegramId(String(telegramId));
-  if (!dbUser) {
-    // New user: greet and start onboarding (NO menu keyboard)
+  let dbUser = await getUserByTelegramId(String(telegramId));
+  if (dbUser) {
+    // Existing user: show menu
     await sendTelegramMessage({
-      chat_id: telegramId,
-      text:
-        `👋 *Welcome, ${username}!*\n\n` +
-        `This bot delivers *instant forex price alerts* via voice call and Telegram.\n\n` +
-        `*To get started:*\n\n` +
-        `1. Please type your phone number in *international format* (e.g. +1234567890).\n` +
-        `*We will never share your phone number.*\n\n` +
-        `Once your number is received, you'll be able to set alerts and access all features.\n\n` +
-        `_Thank you for joining Forex Ring Alerts!_`,
-      parse_mode: 'Markdown',
-    });
-    return;
-  }
-  // Existing user: check onboarded status
-  if (dbUser.onboarded) {
-    // Onboarded: show menu
-    await sendTelegramMessage({
-      chat_id: telegramId,
-      text:
-        `👋 Welcome back, ${username}!\n\n` +
-        `You have *${dbUser.credits} credits* available.\n\n` +
-        `Use the menu below to set or manage your alerts.`,
+      chat_id: chat.id,
+      text: `Welcome back, ${username}.
+\nUse the menu below to set, view, or manage your alerts.`,
       parse_mode: 'Markdown',
       reply_markup: mainMenuKeyboard,
     });
     return;
-  } else {
-    // Not onboarded yet, prompt for phone number again (NO menu keyboard)
-    await sendTelegramMessage({
-      chat_id: telegramId,
-      text:
-        `👋 *Welcome, ${username}!*\n\n` +
-        `This bot delivers *instant forex price alerts* via voice call and Telegram.\n\n` +
-        `*To get started:*\n\n` +
-        `1. Please type your phone number in *international format* (e.g. +1234567890).\n` +
-        `*We will never share your phone number.*\n\n` +
-        `Once your number is received, you'll be able to set alerts and access all features.\n\n` +
-        `_Thank you for joining Forex Ring Alerts!_`,
-      parse_mode: 'Markdown',
-    });
-    return;
   }
+  // New user: show welcome message with menu, then add to DB
+  const welcomeMsg =
+    `Welcome, ${username}.
+
+You are about to experience the fastest, most reliable forex price alert system available.
+
+I originally built this tool for my own trading requirements. After missing key market moves due to slow notifications from other services, I realized the need for true instant alerts—especially voice calls, which cut through the noise and distractions.
+
+Since using this system, I've never missed a critical entry or exit, and my trading results have improved dramatically.
+
+I've decided to make Forex Ring Alerts available to a few other traders as well, and I believe it will help you on your trading journey.`;
+  await sendTelegramMessage({
+    chat_id: chat.id,
+    text: welcomeMsg,
+    parse_mode: 'Markdown',
+    reply_markup: mainMenuKeyboard,
+  });
+  // Now add the user to the DB
+  await createUser({
+    telegram_id: String(telegramId),
+    credits: 0,
+    phone_number: '',
+    username: user.username || undefined,
+    subscription_status: 'inactive',
+    subscription_end: null,
+    max_active_alerts: 5,
+    created_via: args && args.trim() ? args.trim() : 'organic',
+  });
+  return;
 } 

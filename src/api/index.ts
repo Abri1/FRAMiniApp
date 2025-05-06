@@ -1,0 +1,1 @@
+// NOTE: All Google Sheets admin panel endpoints and logic should be implemented in src/adminsheet/ (not here). See IMPLEMENTATION_PLAN.md and CONTEXT.md for rationale and details. 

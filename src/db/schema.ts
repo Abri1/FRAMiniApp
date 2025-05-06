@@ -6,13 +6,14 @@ export interface DatabaseSchema {
     credits: number;
     phone_number: string;
     created_at: string;
+    username?: string;
   };
   alerts: {
     id: string;
     user_id: string;
     pair: string;
     target_price: number;
-    direction: 'above' | 'below';
+    direction: 'above' | 'below' | null;
     active: boolean;
     created_at: string;
     notification_sent?: boolean;

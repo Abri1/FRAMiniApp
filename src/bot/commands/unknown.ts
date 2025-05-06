@@ -16,15 +16,9 @@ export async function handleUnknownCommand(
   user: TelegramUser, 
   command: string
 ): Promise<void> {
-  logger.info('Handling unknown command "%s" for user %d', command, user.id);
-  
-  // Send error message
   await sendTelegramMessage({
     chat_id: chat.id,
-    text: `⚠️ Sorry, I don't understand the command "/${command}".`,
+    text: `Unrecognized command: /${command}\n\nPlease refer to the /help command for a full list of supported actions.\n\nForex Ring Alerts is designed for precision and reliability. If you need assistance, contact @abribooysen.`,
     parse_mode: 'Markdown'
   });
-  
-  // Show help message
-  await handleHelpCommand(chat, user, '');
 } 

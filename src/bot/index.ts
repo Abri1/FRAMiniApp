@@ -10,15 +10,15 @@ import { handleCreateAlertCommand } from './commands/createAlert';
 import { handleListAlertsCommand } from './commands/listAlerts';
 import { handleDeleteAlertCommand } from './commands/deleteAlert';
 import { handleUnknownCommand } from './commands/unknown';
-import { startSetAlertFlow } from './flows/setAlert';
 import { viewAlerts } from './flows/viewAlerts';
-import { showCredits } from './commands/credits';
-import { showInfo } from './commands/info';
+import { showAccount } from './commands/account';
 import { showMainMenu, mainMenuKeyboard } from './menu';
 import { deleteAlertById } from './flows/deleteAlert';
-import { editAlertById } from './flows/editAlert';
-import { handlePhoneNumberSubmission } from './flows/onboarding';
-import { getUserByTelegramId } from '../integrations/supabase';
+import { getUserByTelegramId, updateUserUsername, updateLastActiveAt } from '../integrations/supabase';
+import { FlowManager } from './flows/flowManager';
+import { SetAlertFlow } from './flows/setAlert';
+import { EditAlertFlow } from './flows/editAlert';
+import { showInfo } from './commands/info';
 
 // In-memory map to track which user is editing which alert
 const editAlertStates = new Map<string, string>(); // telegramId -> alertId
@@ -43,15 +43,22 @@ const commandHandlers: Record<string, (chat: TelegramChat, user: TelegramUser, a
  */
 export async function processMessage(chat: TelegramChat, user: TelegramUser, text: string): Promise<void> {
   try {
-    logger.info('Processing message from user %d: %s', user.id, text);
-    // Check if this is a slash command
+    // Track user activity
+    await updateLastActiveAt(String(user.id));
+    // Update username in DB if changed or missing
+    if (user.username) {
+      const dbUser = await getUserByTelegramId(String(user.id));
+      if (!dbUser || dbUser.username !== user.username) {
+        await updateUserUsername(String(user.id), user.username);
+      }
+    }
+    // 1. Check for global commands (slash commands)
     if (text.startsWith(COMMAND_PREFIX)) {
+      await FlowManager.endFlow(user.id);
       const fullCommand = text.substring(COMMAND_PREFIX.length);
       const [command, ...argArray] = fullCommand.split(' ');
       const commandName = command.toLowerCase().replace('@forexringalertsbot', '');
       const args = argArray.join(' ');
-
-      // Execute command handler or fallback
       const handler = commandHandlers[commandName];
       if (handler) {
         await handler(chat, user, args);
@@ -59,45 +66,47 @@ export async function processMessage(chat: TelegramChat, user: TelegramUser, tex
         await handleUnknownCommand(chat, user, commandName);
       }
       return;
-    } else {
-      const trimmed = text.trim();
-      const trimmedLower = trimmed.toLowerCase();
-      // Handle menu button presses
+    }
+    // 2. Check for main menu button presses
+    const trimmed = text.trim();
+    const trimmedLower = trimmed.toLowerCase();
+    if ([
+      'set alert',
+      'view alerts',
+      'account',
+      'info'
+    ].includes(trimmedLower)) {
+      await FlowManager.endFlow(user.id);
       if (trimmedLower === 'set alert') {
-        await startSetAlertFlow(chat.id);
+        await FlowManager.startFlow(user.id, SetAlertFlow);
         return;
       }
       if (trimmedLower === 'view alerts') {
         await viewAlerts(chat.id);
         return;
       }
-      if (trimmedLower === 'credits') {
-        await showCredits(chat.id);
+      if (trimmedLower === 'account') {
+        await showAccount(chat.id);
         return;
       }
       if (trimmedLower === 'info') {
-        await showInfo(chat.id); // info handler now includes keyboard
+        await showInfo(chat.id);
         return;
       }
-      // Continue with onboarding or main menu logic
-      // 1. If this looks like a phone number, treat as onboarding submission
-      if (/^\+[1-9]\d{9,14}$/.test(trimmed)) {
-        await handlePhoneNumberSubmission(user.id, trimmed);
-        return;
-      }
-      // 2. Otherwise, fetch the user once to decide next step
-      const dbUser = await getUserByTelegramId(String(user.id));
-      if (!dbUser || !dbUser.onboarded) {
-        // Re-prompt onboarding instructions
-        await handleStartCommand(chat, user, '');
-        return;
-      }
-      // 3. User fully onboarded: show main menu
+    }
+    // 3. If user is in a flow, delegate to FlowManager
+    if (await FlowManager.handleMessage(user.id, text)) {
+      return;
+    }
+    // 4. Continue with main menu logic
+    const dbUser = await getUserByTelegramId(String(user.id));
+    if (!dbUser) {
       await showMainMenu(user.id);
       return;
     }
+    await showMainMenu(user.id);
+    return;
   } catch (err) {
-    logger.error('Error processing message: %o', err);
     await sendTelegramMessage({ 
       chat_id: chat.id, 
       text: '⚠️ Sorry, an error occurred while processing your message. Please try again later.' 
@@ -119,25 +128,22 @@ export async function processCallbackQuery(
   chat?: TelegramChat
 ): Promise<void> {
   try {
-    logger.info('Processing callback query from user %d: %s', user.id, data);
     const [action, ...params] = data.split(':');
     switch (action) {
       case 'delete_alert':
         if (chat && params[0]) {
-          await deleteAlertById(chat.id, params[0]);
+          await deleteAlertById(chat.id, parseInt(params[0], 10));
         }
         break;
       case 'edit_alert':
         if (chat && params[0]) {
-          editAlertStates.set(String(chat.id), params[0]);
-          await editAlertById(chat.id, params[0]);
+          await FlowManager.startFlow(chat.id, EditAlertFlow, params[0]);
         }
         break;
       default:
         logger.warn('Unknown callback action: %s', action);
     }
   } catch (err) {
-    logger.error('Error processing callback query: %o', err);
     if (chat) {
       await sendTelegramMessage({
         chat_id: chat.id,
@@ -152,7 +158,6 @@ export async function processCallbackQuery(
  * @param update The Telegram update object
  */
 export async function handleUpdate(update: TelegramUpdate): Promise<void> {
-  logger.info('handleUpdate raw update: %o', update);
   const message = update.message?.text?.trim();
   const chatObj = update.message?.chat;
   const userObj = update.message?.from;

@@ -6,7 +6,7 @@ import { sendTelegramMessage } from '../integrations/telegram';
 
 export const MENU_BUTTONS: string[][] = [
   ['Set Alert', 'View Alerts'],
-  ['Credits', 'Info'],
+  ['Account', 'Info'],
 ];
 
 export function buildMainMenuKeyboard() {
@@ -26,9 +26,12 @@ export const mainMenuKeyboard = buildMainMenuKeyboard();
  * @param telegramId Telegram user ID
  */
 export async function showMainMenu(telegramId: number | string) {
+  let text = '\u200B'; // Default to zero-width space
+  // Defensive: if text is empty or whitespace, use zero-width space
+  if (!text || text.trim() === '') text = '\u200B';
   await sendTelegramMessage({
     chat_id: telegramId,
-    text: '', // No prompt, just the keyboard
+    text,
     reply_markup: mainMenuKeyboard,
   });
 } 

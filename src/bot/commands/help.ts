@@ -13,31 +13,11 @@ import { mainMenuKeyboard } from '../menu';
  * @returns Promise<void>
  */
 export async function handleHelpCommand(chat: TelegramChat, user: TelegramUser, args: string): Promise<void> {
-  logger.info('Handling /help command for user %d', user.id);
   const helpMessage =
-    `*Forex Ring Alerts Help*
-
-` +
-    `Use the following commands:
-` +
-    `/start - Start the bot or re-register
-` +
-    `/createalert - Create a new price alert
-` +
-    `/listalerts - List your active alerts
-` +
-    `/deletealert - Delete an alert
-` +
-    `/help - Show this help message
-
-` +
-    `All commands must be sent as plain text. If you have any issues, contact support.`;
+    `Forex Ring Alerts – Command Reference\n\nWelcome to your professional trading edge. Every feature is designed for speed, precision, and reliability.\n\nAvailable Commands\n\n/start         – Begin or re-register your account\n/createalert   – Set a new price alert for any major forex pair\n/listalerts    – View and manage your active alerts\n/deletealert   – Remove an alert by its ID\n/help          – Display this command reference\n\nAll commands must be sent as plain text.\n\nFor advanced support or bespoke trading needs, contact @abribooysen.\n\nMaximize your trading potential with instant, reliable alerts.\n`;
 
   await sendTelegramMessage({
     chat_id: chat.id,
     text: helpMessage,
-    parse_mode: 'Markdown',
-    disable_web_page_preview: true,
-    reply_markup: mainMenuKeyboard,
   });
 } 
