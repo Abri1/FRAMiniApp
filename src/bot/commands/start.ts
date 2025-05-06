@@ -35,13 +35,11 @@ export async function handleStartCommand(chat: TelegramChat, user: TelegramUser,
   const welcomeMsg =
     `Welcome, ${username}.
 
-You are about to experience the fastest, most reliable forex price alert system available.
+Forex Ring Alerts helps you set up instant notifications for currency price changes, including optional voice call alerts.
 
-I originally built this tool for my own trading requirements. After missing key market moves due to slow notifications from other services, I realized the need for true instant alerts—especially voice calls, which cut through the noise and distractions.
+This tool was created to provide fast, reliable notifications for anyone who wants to stay informed about currency movements. You can customize your alerts to fit your needs and receive updates directly in Telegram.
 
-Since using this system, I've never missed a critical entry or exit, and my trading results have improved dramatically.
-
-I've decided to make Forex Ring Alerts available to a few other traders as well, and I believe it will help you on your trading journey.`;
+Please note: This service is for informational purposes only and does not provide financial or investment advice.`;
   await sendTelegramMessage({
     chat_id: chat.id,
     text: welcomeMsg,
