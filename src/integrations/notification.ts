@@ -116,11 +116,9 @@ export async function sendVoiceCall(to: string, message: string, pair?: string, 
   }
   try {
     const client = new Twilio(config.twilioAccountSid, config.twilioAuthToken);
-    // If all alert params provided, use custom TwiML
-    const twiml = (pair && direction && typeof price === 'number')
-      ? buildVoiceAlertTwiML(pair, direction, price)
-      : `<Response><Say voice=\"Google.en-US-Neural2-F\" language=\"en-US\">${message}</Say></Response>`;
-    // Set statusCallback URL
+    // Instead of sending the message TwiML directly, send a <Redirect> to the play-message endpoint
+    const playMessageUrl = `${process.env.PUBLIC_URL || 'https://yourdomain.com'}/api/twilio/play-message${alertId ? `?alertId=${encodeURIComponent(alertId)}` : ''}`;
+    const twiml = `<?xml version="1.0" encoding="UTF-8"?>\n<Response>\n  <Redirect method=\"POST\">${playMessageUrl}</Redirect>\n</Response>`;
     const statusCallback = `${process.env.PUBLIC_URL || 'https://yourdomain.com'}/api/twilio/call-status`;
     const call = await client.calls.create({
       twiml,
