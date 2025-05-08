@@ -2,12 +2,19 @@
 
 import express from 'express';
 import bodyParser from 'body-parser';
-import { supabase } from '../integrations/supabase';
+import { supabase, getAlertsByUserId, createAlert, updateAlert, deleteAlert, AlertCreateData } from '../integrations/supabase';
 import logger from '../logger';
+import type { Request, Response, NextFunction } from 'express';
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+
+// Extend Express Request type for userId and telegramUser
+interface TelegramAuthedRequest extends Request {
+  userId?: number;
+  telegramUser?: any;
+}
 
 // New endpoint: Twilio fetches this after call is answered
 app.post('/api/twilio/play-message', async (req, res) => {
@@ -54,4 +61,120 @@ app.post('/api/twilio/play-message', async (req, res) => {
   }
   const twiml = `<?xml version="1.0" encoding="UTF-8"?>\n<Response>\n  <Say voice=\"Google.en-US-Neural2-F\" language=\"en-US\">${message}</Say>\n</Response>`;
   res.type('text/xml').send(twiml);
+});
+
+// --- Telegram Mini App Auth Middleware ---
+/**
+ * Middleware to validate Telegram Mini App initData and extract user ID
+ * (Signature validation to be implemented)
+ */
+function telegramAuthMiddleware(req: TelegramAuthedRequest, res: Response, next: NextFunction) {
+  // Accept initData from query, header, or body
+  const initData = req.query.initData || req.headers['x-telegram-initdata'] || req.body.initData;
+  if (!initData) {
+    res.status(401).json({ error: 'Missing Telegram initData' });
+    return;
+  }
+  // TODO: Validate initData signature using Telegram bot token (HMAC-SHA256)
+  // See: https://core.telegram.org/bots/webapps#validating-data-received-via-the-web-app
+  // For now, just parse user info (UNSAFE, for dev only)
+  try {
+    const params = Object.fromEntries(new URLSearchParams(initData));
+    if (!params.user) {
+      res.status(401).json({ error: 'Invalid initData: missing user' });
+      return;
+    }
+    const user = JSON.parse(params.user);
+    req.userId = user.id;
+    req.telegramUser = user;
+    next();
+  } catch (e) {
+    res.status(401).json({ error: 'Invalid initData format' });
+  }
+}
+
+// --- Mini App: List Alerts Endpoint ---
+app.get('/api/alerts', telegramAuthMiddleware, async (req: TelegramAuthedRequest, res: Response) => {
+  try {
+    if (!req.userId) {
+      res.status(401).json({ error: 'Unauthorized: missing userId' });
+      return;
+    }
+    const alerts = await getAlertsByUserId(String(req.userId));
+    res.json({ alerts });
+  } catch (error) {
+    logger.error('GET /api/alerts error: %o', error);
+    res.status(500).json({ error: 'Failed to fetch alerts' });
+  }
+});
+
+// --- Mini App: Create Alert Endpoint ---
+app.post('/api/alerts', telegramAuthMiddleware, async (req: TelegramAuthedRequest, res: Response) => {
+  try {
+    if (!req.userId) {
+      res.status(401).json({ error: 'Unauthorized: missing userId' });
+      return;
+    }
+    const alertData: AlertCreateData = {
+      ...req.body,
+      user_id: String(req.userId),
+    };
+    const alertId = await createAlert(alertData);
+    if (!alertId) {
+      res.status(400).json({ error: 'Failed to create alert' });
+      return;
+    }
+    res.status(201).json({ alertId });
+  } catch (error) {
+    logger.error('POST /api/alerts error: %o', error);
+    res.status(500).json({ error: 'Failed to create alert' });
+  }
+});
+
+// --- Mini App: Update Alert Endpoint ---
+app.put('/api/alerts/:id', telegramAuthMiddleware, async (req: TelegramAuthedRequest, res: Response) => {
+  try {
+    if (!req.userId) {
+      res.status(401).json({ error: 'Unauthorized: missing userId' });
+      return;
+    }
+    const alertId = Number(req.params.id);
+    if (!alertId) {
+      res.status(400).json({ error: 'Invalid alert ID' });
+      return;
+    }
+    const success = await updateAlert(alertId, req.body);
+    if (!success) {
+      res.status(400).json({ error: 'Failed to update alert' });
+      return;
+    }
+    res.json({ success: true });
+  } catch (error) {
+    logger.error('PUT /api/alerts/:id error: %o', error);
+    res.status(500).json({ error: 'Failed to update alert' });
+  }
+});
+
+// --- Mini App: Delete Alert Endpoint ---
+app.delete('/api/alerts/:id', telegramAuthMiddleware, async (req: TelegramAuthedRequest, res: Response) => {
+  try {
+    if (!req.userId) {
+      res.status(401).json({ error: 'Unauthorized: missing userId' });
+      return;
+    }
+    const alertId = Number(req.params.id);
+    if (!alertId) {
+      res.status(400).json({ error: 'Invalid alert ID' });
+      return;
+    }
+    const success = await deleteAlert(alertId);
+    if (!success) {
+      res.status(400).json({ error: 'Failed to delete alert' });
+      return;
+    }
+    res.json({ success: true });
+  } catch (error) {
+    logger.error('DELETE /api/alerts/:id error: %o', error);
+    res.status(500).json({ error: 'Failed to delete alert' });
+  }
 }); 

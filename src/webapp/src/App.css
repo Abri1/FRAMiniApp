@@ -1,0 +1,132 @@
+/* Telegram Mini App: Mobile-first, theme-aware styles */
+:root {
+  --tg-bg: #ffffff;
+  --tg-fg: #222222;
+  --tg-accent: #229ed9;
+  --tg-border: #e0e0e0;
+  --tg-muted: #888888;
+}
+
+body[data-theme='dark'] {
+  --tg-bg: #181a20;
+  --tg-fg: #f5f5f5;
+  --tg-accent: #229ed9;
+  --tg-border: #23272f;
+  --tg-muted: #aaaaaa;
+}
+
+body {
+  background: var(--tg-bg);
+  color: var(--tg-fg);
+  font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+  margin: 0;
+  padding: 0 0 60px 0; /* leave space for tab bar */
+  min-height: 100vh;
+  transition: background 0.2s, color 0.2s;
+}
+
+.App {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 1em 0.5em 2em 0.5em;
+}
+
+h1, h2 {
+  font-weight: 700;
+  margin: 0.5em 0 0.5em 0;
+}
+
+button {
+  background: var(--tg-accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5em 1.2em;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  margin: 0.2em 0.2em 0.2em 0;
+  transition: background 0.15s;
+}
+button:hover, button:focus {
+  background: #177ca6;
+}
+
+.alerts-page, .account-info-page, .info-help-page {
+  background: var(--tg-bg);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  padding: 1em;
+  margin-bottom: 1em;
+}
+
+.alerts-page ul, .account-info-page ul, .info-help-page ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.alerts-page li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--tg-bg);
+  border: 1px solid var(--tg-border);
+  border-radius: 8px;
+  margin-bottom: 0.7em;
+  padding: 0.8em 1em;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+}
+
+.alerts-page li strong {
+  font-size: 1.1em;
+}
+
+.alerts-page li div {
+  display: flex;
+  gap: 0.5em;
+}
+
+.account-info-page img {
+  margin-top: 0.5em;
+  border: 2px solid var(--tg-border);
+}
+
+nav {
+  background: var(--tg-bg);
+  border-top: 1px solid var(--tg-border);
+  box-shadow: 0 -1px 4px rgba(0,0,0,0.03);
+}
+
+nav button {
+  background: none;
+  color: var(--tg-fg);
+  border: none;
+  border-radius: 8px;
+  padding: 0.5em 1.2em;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  margin: 0.2em 0.2em 0.2em 0;
+  transition: background 0.15s, color 0.15s;
+}
+nav button[style*='background: #e0e0e0'] {
+  background: var(--tg-accent);
+  color: #fff;
+}
+
+@media (max-width: 600px) {
+  .App {
+    padding: 0.5em 0.1em 2em 0.1em;
+  }
+  h1 {
+    font-size: 1.2em;
+  }
+  h2 {
+    font-size: 1em;
+  }
+  button {
+    font-size: 0.95em;
+    padding: 0.4em 0.8em;
+  }
+}

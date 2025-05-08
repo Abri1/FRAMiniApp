@@ -22,6 +22,18 @@ export async function handleStartCommand(chat: TelegramChat, user: TelegramUser,
   let dbUser = await getUserByTelegramId(String(telegramId));
   if (dbUser) {
     // Existing user: show menu
+    // Send web_app button to launch Mini App
+    await sendTelegramMessage({
+      chat_id: chat.id,
+      text: `🚀 Try the new Mini App for a better experience!`,
+      parse_mode: 'Markdown',
+      reply_markup: {
+        inline_keyboard: [[{
+          text: 'Open Mini App',
+          web_app: { url: 'https://YOUR_MINI_APP_URL_HERE' } // TODO: Replace with deployed Mini App URL
+        }]]
+      }
+    });
     await sendTelegramMessage({
       chat_id: chat.id,
       text: `Welcome back, ${username}.
@@ -44,6 +56,16 @@ Please note: This service is for informational purposes only and does not provid
     chat_id: chat.id,
     text: welcomeMsg,
     parse_mode: 'Markdown',
+    reply_markup: {
+      inline_keyboard: [[{
+        text: 'Open Mini App',
+        web_app: { url: 'https://YOUR_MINI_APP_URL_HERE' } // TODO: Replace with deployed Mini App URL
+      }]]
+    }
+  });
+  await sendTelegramMessage({
+    chat_id: chat.id,
+    text: '\u200B',
     reply_markup: mainMenuKeyboard,
   });
   // Now add the user to the DB

@@ -1,7 +1,27 @@
-# Forex Ring Alerts Documentation
+# Forex Ring Alerts V4 — Telegram Mini App Migration
 
-## Architectural Simplification (2025-05-03)
-- The Express API server and Twilio webhook endpoint are no longer required.
-- All notification logic (including Twilio voice calls) is handled in the main bot process.
-- Twilio call flow now uses a TwiML <Redirect> to /api/twilio/play-message, so the message only plays after the call is answered. This prevents users from missing the start of the message if they answer late.
-- See `CONTEXT.md` and `IMPLEMENTATION_PLAN.md` for details and rationale.
+## Project Overview
+This project is migrating from a classic Telegram bot to a modern Telegram Mini App, providing a native-like, responsive UI inside Telegram. All business logic will be accessible via a REST API, and the Mini App will be the primary user interface.
+
+- **Frontend:** React Mini App (in `src/webapp/`)
+- **Backend:** Node.js REST API (in `src/api/`), reusing/refactoring existing business logic
+- **Bot:** Telegram bot for launching the Mini App and legacy command support
+- **Database:** Supabase (Postgres)
+- **Hosting:** Railway (Node.js + static frontend)
+
+## Migration Status
+- [x] Migration plan and context documented
+- [ ] Mini App frontend scaffolded
+- [ ] REST API endpoints implemented
+- [ ] Bot updated to launch Mini App
+- [ ] Full E2E testing
+- [ ] Deployment to Railway
+
+## Onboarding
+- See `docs/IMPLEMENTATION_PLAN.md` for step-by-step progress and next actions.
+- See `docs/CONTEXT.md` for architectural rationale and key decisions.
+- All configuration is managed via `.env` files (never hardcoded).
+
+---
+
+_Last updated: 2025-05-02_
