@@ -73,7 +73,11 @@ async function initializeApp() {
   (['get', 'use', 'post', 'put', 'delete'] as const).forEach(method => {
     const original = (app as any)[method].bind(app);
     (app as any)[method] = (path: string, ...args: any[]) => {
-      logger.info(`Registering route [${method.toUpperCase()}]: ${path}`);
+      logger.info(`Registering route [${method.toUpperCase()}]:`, path);
+      if (typeof path !== 'string' || path.startsWith('http')) {
+        logger.error(`Invalid route path for [${method.toUpperCase()}]:`, path);
+        return;
+      }
       return original(path, ...args);
     };
   });
