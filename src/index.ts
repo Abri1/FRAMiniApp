@@ -59,6 +59,9 @@ async function initializeApp() {
   // Serve Mini App static files
   app.use('/webapp', express.static(path.resolve(__dirname, 'webapp', 'dist')));
 
+  // Redirect root to /webapp
+  app.get('/', (req, res) => res.redirect('/webapp'));
+
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => {
     logger.info(`Server running on port ${PORT}`);
