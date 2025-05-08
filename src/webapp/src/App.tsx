@@ -20,11 +20,6 @@ interface Alert {
   value: number;
 }
 
-const initialAlerts: Alert[] = [
-  { id: 1, pair: 'EUR/USD', condition: 'Above', value: 1.10 },
-  { id: 2, pair: 'GBP/USD', condition: 'Below', value: 1.25 },
-];
-
 // Simple Toast component
 function Toast({ message, type, onClose }: { message: string; type: 'success' | 'error'; onClose: () => void }) {
   return (
@@ -325,7 +320,6 @@ const TABS = [
 
 function App() {
   const [user, setUser] = useState<TelegramUser | null>(null)
-  const [initData, setInitData] = useState<string | null>(null)
   const [isTelegram, setIsTelegram] = useState<boolean>(false)
   const [tab, setTab] = useState<'alerts' | 'account' | 'info'>('alerts');
 
@@ -334,8 +328,6 @@ function App() {
     const tg = (window as any).Telegram?.WebApp
     if (tg) {
       setIsTelegram(true)
-      // Extract initData (for backend validation)
-      setInitData(tg.initData || null)
       // Extract user info (for display)
       if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
         setUser(tg.initDataUnsafe.user)
