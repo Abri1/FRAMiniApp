@@ -1,12 +1,32 @@
 // Main entrypoint for Forex Ring Alerts
 
+import express from 'express';
+import path from 'path';
 import logger from './logger';
+import { setupApiRoutes } from './api';
 import { processUpdate, getUpdates } from './integrations/telegram';
 import { loadConfig } from './config';
 import { fetchAndCacheForexPairs } from './integrations/forex';
 import { initializeSubscriptions } from './priceMonitor';
 
 const config = loadConfig();
+
+async function startTelegramPolling() {
+  let offset = 0;
+  logger.info('Starting Telegram polling loop...');
+  while (true) {
+    try {
+      const updates = await getUpdates(offset);
+      for (const update of updates) {
+        await processUpdate(update);
+        offset = update.update_id + 1;
+      }
+    } catch (err) {
+      logger.error('Polling error: %o', err);
+    }
+    await new Promise(res => setTimeout(res, 1000)); // Poll every second
+  }
+}
 
 async function initializeApp() {
   try {
@@ -32,20 +52,20 @@ async function initializeApp() {
     }
   }, 60 * 60 * 1000); // every hour
 
-  let offset = 0;
-  logger.info('Starting Telegram polling loop...');
-  while (true) {
-    try {
-      const updates = await getUpdates(offset);
-      for (const update of updates) {
-        await processUpdate(update);
-        offset = update.update_id + 1;
-      }
-    } catch (err) {
-      logger.error('Polling error: %o', err);
-    }
-    await new Promise(res => setTimeout(res, 1000)); // Poll every second
-  }
+  // --- Start Express server ---
+  const app = express();
+  setupApiRoutes(app);
+
+  // Serve Mini App static files
+  app.use('/webapp', express.static(path.resolve(__dirname, 'webapp', 'dist')));
+
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    logger.info(`Server running on port ${PORT}`);
+  });
+
+  // --- Start Telegram polling loop (non-blocking) ---
+  startTelegramPolling();
 }
 
 // Start the app
