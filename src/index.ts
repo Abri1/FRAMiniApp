@@ -1,6 +1,6 @@
 // Main entrypoint for Forex Ring Alerts
 
-import express from 'express';
+import express, { Request, Response } from 'express';
 import path from 'path';
 import logger from './logger';
 import { setupApiRoutes } from './api';
@@ -60,10 +60,10 @@ async function initializeApp() {
   app.use('/webapp', express.static(path.resolve(__dirname, 'webapp', 'dist')));
 
   // Redirect root to /webapp
-  app.get('/', (req, res) => res.redirect('/webapp'));
+  app.get('/', (req: Request, res: Response) => res.redirect('/webapp'));
 
   // Catch-all: serve Mini App for any other route (SPA support)
-  app.get('*', (req, res) => {
+  app.get('*', (req: Request, res: Response) => {
     const indexPath = path.resolve(__dirname, 'webapp', 'dist', 'index.html');
     logger.info(`Serving Mini App index.html from: ${indexPath}`);
     res.sendFile(indexPath);
@@ -72,13 +72,13 @@ async function initializeApp() {
   // Monkey-patch route registration methods to log all registered paths
   (['get', 'use', 'post', 'put', 'delete'] as const).forEach(method => {
     const original = (app as any)[method].bind(app);
-    (app as any)[method] = (path: string, ...args: any[]) => {
-      logger.info(`Registering route [${method.toUpperCase()}]:`, path);
-      if (typeof path !== 'string' || path.startsWith('http')) {
-        logger.error(`Invalid route path for [${method.toUpperCase()}]:`, path);
+    (app as any)[method] = (routePath: string, ...args: any[]) => {
+      logger.info(`Registering route [${method.toUpperCase()}]:`, routePath);
+      if (typeof routePath !== 'string' || routePath.startsWith('http')) {
+        logger.error(`Invalid route path for [${method.toUpperCase()}]:`, routePath);
         return;
       }
-      return original(path, ...args);
+      return original(routePath, ...args);
     };
   });
 
