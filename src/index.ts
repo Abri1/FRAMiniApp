@@ -62,6 +62,11 @@ async function initializeApp() {
   // Redirect root to /webapp
   app.get('/', (req, res) => res.redirect('/webapp'));
 
+  // Catch-all: serve Mini App for any other route (SPA support)
+  app.get('*', (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'webapp', 'dist', 'index.html'));
+  });
+
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => {
     logger.info(`Server running on port ${PORT}`);
