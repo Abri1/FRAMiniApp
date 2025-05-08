@@ -69,6 +69,15 @@ async function initializeApp() {
     res.sendFile(indexPath);
   });
 
+  // Monkey-patch route registration methods to log all registered paths
+  (['get', 'use', 'post', 'put', 'delete'] as const).forEach(method => {
+    const original = (app as any)[method].bind(app);
+    (app as any)[method] = (path: string, ...args: any[]) => {
+      logger.info(`Registering route [${method.toUpperCase()}]: ${path}`);
+      return original(path, ...args);
+    };
+  });
+
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => {
     logger.info(`Server running on port ${PORT}`);
