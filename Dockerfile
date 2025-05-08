@@ -7,16 +7,10 @@ WORKDIR /app
 # Copy all files
 COPY . .
 
-# Install backend/root dependencies
+# Install all dependencies (root and webapp handled by build script)
 RUN npm install
 
-# Install frontend dependencies and build frontend
-WORKDIR /app/src/webapp
-RUN npm install
-RUN npm run build
-
-# Go back to root and build backend (TypeScript, etc.)
-WORKDIR /app
+# Build both frontend and backend using the root build script
 RUN npm run build
 
 # Expose the port your app runs on (adjust if needed)
