@@ -64,7 +64,9 @@ async function initializeApp() {
 
   // Catch-all: serve Mini App for any other route (SPA support)
   app.get('*', (req, res) => {
-    res.sendFile(path.resolve(__dirname, 'webapp', 'dist', 'index.html'));
+    const indexPath = path.resolve(__dirname, 'webapp', 'dist', 'index.html');
+    logger.info(`Serving Mini App index.html from: ${indexPath}`);
+    res.sendFile(indexPath);
   });
 
   const PORT = process.env.PORT || 3000;
