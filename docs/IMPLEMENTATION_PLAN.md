@@ -28,13 +28,19 @@
 - [ ] Serve Mini App frontend from backend
 
 ## Phase 4: Bot Integration
-- [>] Update bot to send `web_app` button (keyboard/inline) to launch Mini App *(next step)*
+- [x] Update bot to send `web_app` button (keyboard/inline) to launch Mini App
+  - [x] Added `MINI_APP_URL` to config (`src/config/index.ts`)
+  - [x] `/start` command sends Mini App button using `MINI_APP_URL` (`src/bot/commands/start.ts`)
+  - [x] Added "🚀 Open App" to main reply keyboard (`src/bot/menu.ts`)
+  - [x] New command `handleOpenAppCommand` (`src/bot/commands/openApp.ts`) sends Mini App button
+  - [x] Main message handler invokes `handleOpenAppCommand` for "🚀 Open App" (`src/bot/index.ts`)
+  - [ ] Action Required: Create `.env.example` and `.env` with `MINI_APP_URL`
 - [ ] (Optional) Set Main Mini App via BotFather for profile/menu access
 - [ ] (Optional) Retain legacy command support for transition
 
 ## Phase 5: Deployment & CI/CD
 - [ ] Add Railway configuration for monorepo (Node.js + static frontend)
-- [ ] Ensure all config/secrets are in `.env` and `.env.example`
+- [ ] Ensure all config/secrets are in `.env` and `.env.example` (partially done, see above)
 - [ ] Add CI/CD for build, lint, and test (backend & frontend)
 
 ## Phase 6: Testing

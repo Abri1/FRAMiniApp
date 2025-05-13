@@ -28,9 +28,10 @@ All user input for alert creation is now strictly validated:
 
 ## Getting Started
 1. Clone the repo
-2. Install dependencies: `npm install`
-3. Build: `npm run build`
-4. Start: `npm run start`
+2. Create a `.env` file by copying `.env.example` (`cp .env.example .env`) and fill in your specific values. Ensure `MINI_APP_URL` is set to your deployed Mini App's URL.
+3. Install dependencies: `npm install`
+4. Build: `npm run build`
+5. Start: `npm run start`
 
 ## Database Backups
 To enable automated database backups, set your Supabase/Postgres connection string as an environment variable before running the backup script:
@@ -46,6 +47,23 @@ Run the backup script with:
 ```
 
 See script comments for cron scheduling and restore instructions.
+
+## Environment Variables
+
+The application requires the following environment variables to be set (see `.env.example`):
+- `TELEGRAM_BOT_TOKEN`: Your Telegram Bot API token.
+- `MINI_APP_URL`: The full URL to your deployed Telegram Mini App frontend.
+- `FOREX_API_KEY`: API key for the forex data provider.
+- `FOREX_API_URL`: URL for the forex data provider API.
+- `SUPABASE_URL`: Your Supabase project URL.
+- `SUPABASE_ANON_KEY`: Your Supabase anonymous key.
+- `SUPABASE_SERVICE_ROLE_KEY`: Your Supabase service role key.
+- `TWILIO_ACCOUNT_SID`: (Optional) Twilio Account SID for voice call alerts.
+- `TWILIO_AUTH_TOKEN`: (Optional) Twilio Auth Token.
+- `TWILIO_PHONE_NUMBER`: (Optional) Twilio phone number used for sending alerts.
+- `SENTRY_DSN`: (Optional) Sentry DSN for error tracking.
+- `NODE_ENV`: Set to `production` for production builds, `development` otherwise.
+- `PORT`: Port for the application to run on (defaults to 3000).
 
 ## Contributing
 See `docs/IMPLEMENTATION_PLAN.md` and `docs/CONTEXT.md` for project rules, context, and progress tracking.

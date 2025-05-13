@@ -6,6 +6,9 @@ import { getUserByTelegramId, createUser } from '../../integrations/supabase';
 import { TelegramChat, TelegramUser } from '../../integrations/telegram';
 import { mainMenuKeyboard } from '../menu';
 import { FlowManager } from '../flows/flowManager';
+import { loadConfig } from '../../config';
+
+const config = loadConfig();
 
 /**
  * Handle the /start command
@@ -30,7 +33,7 @@ export async function handleStartCommand(chat: TelegramChat, user: TelegramUser,
       reply_markup: {
         inline_keyboard: [[{
           text: 'Open Mini App',
-          web_app: { url: 'https://YOUR_MINI_APP_URL_HERE' } // TODO: Replace with deployed Mini App URL
+          web_app: { url: config.miniAppUrl }
         }]]
       }
     });
@@ -59,7 +62,7 @@ Please note: This service is for informational purposes only and does not provid
     reply_markup: {
       inline_keyboard: [[{
         text: 'Open Mini App',
-        web_app: { url: 'https://YOUR_MINI_APP_URL_HERE' } // TODO: Replace with deployed Mini App URL
+        web_app: { url: config.miniAppUrl }
       }]]
     }
   });

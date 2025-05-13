@@ -25,6 +25,7 @@ export type AppConfig = {
   sentryDsn: string;
   nodeEnv: string;
   port: number;
+  miniAppUrl: string;
 };
 
 export function loadConfig(): AppConfig {
@@ -42,6 +43,7 @@ export function loadConfig(): AppConfig {
     sentryDsn: process.env.SENTRY_DSN || '',
     nodeEnv: process.env.NODE_ENV || 'development',
     port: Number(process.env.PORT) || 3000,
+    miniAppUrl: process.env.MINI_APP_URL || '',
   };
   // Optionally: throw if required config is missing
   return cfg;

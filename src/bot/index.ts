@@ -19,6 +19,7 @@ import { FlowManager } from './flows/flowManager';
 import { SetAlertFlow } from './flows/setAlert';
 import { EditAlertFlow } from './flows/editAlert';
 import { showInfo } from './commands/info';
+import { handleOpenAppCommand } from './commands/openApp';
 
 // In-memory map to track which user is editing which alert
 const editAlertStates = new Map<string, string>(); // telegramId -> alertId
@@ -71,12 +72,17 @@ export async function processMessage(chat: TelegramChat, user: TelegramUser, tex
     const trimmed = text.trim();
     const trimmedLower = trimmed.toLowerCase();
     if ([
+      '🚀 open app',
       'set alert',
       'view alerts',
       'account',
       'info'
     ].includes(trimmedLower)) {
       await FlowManager.endFlow(user.id);
+      if (trimmedLower === '🚀 open app') {
+        await handleOpenAppCommand(chat, user);
+        return;
+      }
       if (trimmedLower === 'set alert') {
         await FlowManager.startFlow(user.id, SetAlertFlow);
         return;

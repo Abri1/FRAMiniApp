@@ -5,6 +5,7 @@ import logger from '../logger';
 import { sendTelegramMessage } from '../integrations/telegram';
 
 export const MENU_BUTTONS: string[][] = [
+  ['🚀 Open App'],
   ['Set Alert', 'View Alerts'],
   ['Account', 'Info'],
 ];
